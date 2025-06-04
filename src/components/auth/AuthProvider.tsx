@@ -23,17 +23,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Check active sessions and fetch user profile
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        // In demo mode, we'll set a mock user with demo data
-        setCurrentUser({
-          id: 'demo-user-id',
-          email: session.user.email || 'demo@example.com',
-          role: 'admin',
-          storeId: 'demo-store-id',
-          storeName: 'GroceryOps Demo Store'
-        });
+        const { data } = await supabase
+          .from('users')
+          .select('role, store_id, stores(name)')
+          .eq('id', session.user.id)
+          .single();
+
+        if (data) {
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: data.role,
+            storeId: data.store_id,
+            storeName: data.stores?.name ?? ''
+          });
+        }
       }
       setLoading(false);
     });
@@ -41,15 +48,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        setCurrentUser({
-          id: 'demo-user-id',
-          email: session.user.email || 'demo@example.com',
-          role: 'admin',
-          storeId: 'demo-store-id',
-          storeName: 'GroceryOps Demo Store'
-        });
+        const { data } = await supabase
+          .from('users')
+          .select('role, store_id, stores(name)')
+          .eq('id', session.user.id)
+          .single();
+
+        if (data) {
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: data.role,
+            storeId: data.store_id,
+            storeName: data.stores?.name ?? ''
+          });
+        }
       } else {
         setCurrentUser(null);
       }

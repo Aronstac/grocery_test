@@ -1,164 +1,148 @@
-// DEMO MODE: This file has been refactored to use mock data instead of Supabase
-// Original Supabase implementation is commented out for future reference
+import { createClient, PostgrestError } from '@supabase/supabase-js';
 
-import { mockProducts, mockDeliveries, mockEmployees } from '../data/mockData';
+export const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!
+);
 
-// Mock authentication functions
-export const supabase = {
-  auth: {
-    signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
-      // In demo mode, accept any credentials
-      return {
-        data: {
-          user: {
-            id: 'demo-user-id',
-            email,
-            role: 'admin'
-          },
-          session: {
-            access_token: 'demo-token',
-            expires_at: Date.now() + 24 * 60 * 60 * 1000 // 24 hours from now
-          }
-        },
-        error: null
-      };
-    },
-    signOut: async () => {
-      return { error: null };
-    },
-    getSession: async () => {
-      // Return a mock session
-      return {
-        data: {
-          session: {
-            user: {
-              id: 'demo-user-id',
-              email: 'demo@example.com',
-              role: 'admin'
-            },
-            access_token: 'demo-token',
-            expires_at: Date.now() + 24 * 60 * 60 * 1000
-          }
-        },
-        error: null
-      };
-    },
-    onAuthStateChange: (callback: Function) => {
-      // Return a mock subscription that does nothing
-      return {
-        data: { subscription: { unsubscribe: () => {} } }
-      };
-    }
-  }
-};
+// Authentication helpers
+export function signInWithPassword({
+  email,
+  password
+}: { email: string; password: string }) {
+  return supabase.auth.signInWithPassword({ email, password });
+}
+
+export function signOut() {
+  return supabase.auth.signOut();
+}
+
+export function getSession() {
+  return supabase.auth.getSession();
+}
 
 // Products
 export async function fetchProducts() {
-  return mockProducts;
+  const { data, error } = await supabase.from('products').select('*');
+  if (error) throw error;
+  return data as Product[];
 }
 
-export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) {
-  const newProduct = {
-    ...product,
-    id: `prod_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  mockProducts.push(newProduct);
-  return newProduct;
+export async function createProduct(
+  product: Omit<Product, 'id' | 'created_at' | 'updated_at'>
+) {
+  const { data, error } = await supabase
+    .from('products')
+    .insert(product)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Product;
 }
 
 export async function updateProduct(id: string, updates: Partial<Product>) {
-  const index = mockProducts.findIndex(p => p.id === id);
-  if (index === -1) throw new Error('Product not found');
-  
-  mockProducts[index] = {
-    ...mockProducts[index],
-    ...updates,
-    updatedAt: new Date().toISOString()
-  };
-  return mockProducts[index];
+  const { data, error } = await supabase
+    .from('products')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Product;
 }
 
 export async function deleteProduct(id: string) {
-  const index = mockProducts.findIndex(p => p.id === id);
-  if (index === -1) throw new Error('Product not found');
-  mockProducts.splice(index, 1);
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) throw error;
 }
 
 // Deliveries
 export async function fetchDeliveries() {
-  return mockDeliveries;
+  const { data, error } = await supabase.from('deliveries').select('*');
+  if (error) throw error;
+  return data as Delivery[];
 }
 
 export async function createDelivery(
   delivery: Omit<Delivery, 'id' | 'created_at' | 'updated_at'>,
   items: Omit<DeliveryItem, 'id' | 'created_at' | 'updated_at'>[]
 ) {
-  const newDelivery = {
-    ...delivery,
-    id: `del_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  mockDeliveries.push(newDelivery);
-  return newDelivery;
+  const { data, error } = await supabase
+    .from('deliveries')
+    .insert(delivery)
+    .select()
+    .single();
+  if (error) throw error;
+
+  if (items.length > 0) {
+    const itemsWithDelivery = items.map((item) => ({
+      ...item,
+      delivery_id: data.id
+    }));
+    const { error: itemError } = await supabase
+      .from('delivery_items')
+      .insert(itemsWithDelivery);
+    if (itemError) throw itemError;
+  }
+
+  return data as Delivery;
 }
 
 export async function updateDelivery(id: string, updates: Partial<Delivery>) {
-  const index = mockDeliveries.findIndex(d => d.id === id);
-  if (index === -1) throw new Error('Delivery not found');
-  
-  mockDeliveries[index] = {
-    ...mockDeliveries[index],
-    ...updates,
-    updatedAt: new Date().toISOString()
-  };
-  return mockDeliveries[index];
+  const { data, error } = await supabase
+    .from('deliveries')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Delivery;
 }
 
 export async function deleteDelivery(id: string) {
-  const index = mockDeliveries.findIndex(d => d.id === id);
-  if (index === -1) throw new Error('Delivery not found');
-  mockDeliveries.splice(index, 1);
+  const { error } = await supabase.from('deliveries').delete().eq('id', id);
+  if (error) throw error;
 }
 
 // Employees
 export async function fetchEmployees() {
-  return mockEmployees;
+  const { data, error } = await supabase.from('employees').select('*');
+  if (error) throw error;
+  return data as Employee[];
 }
 
-export async function createEmployee(employee: Omit<Employee, 'id' | 'created_at' | 'updated_at'>) {
-  const newEmployee = {
-    ...employee,
-    id: `emp_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  mockEmployees.push(newEmployee);
-  return newEmployee;
+export async function createEmployee(
+  employee: Omit<Employee, 'id' | 'created_at' | 'updated_at'>
+) {
+  const { data, error } = await supabase
+    .from('employees')
+    .insert(employee)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Employee;
 }
 
 export async function updateEmployee(id: string, updates: Partial<Employee>) {
-  const index = mockEmployees.findIndex(e => e.id === id);
-  if (index === -1) throw new Error('Employee not found');
-  
-  mockEmployees[index] = {
-    ...mockEmployees[index],
-    ...updates,
-    updatedAt: new Date().toISOString()
-  };
-  return mockEmployees[index];
+  const { data, error } = await supabase
+    .from('employees')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Employee;
 }
 
 export async function deleteEmployee(id: string) {
-  const index = mockEmployees.findIndex(e => e.id === id);
-  if (index === -1) throw new Error('Employee not found');
-  mockEmployees.splice(index, 1);
+  const { error } = await supabase.from('employees').delete().eq('id', id);
+  if (error) throw error;
 }
 
 // User Management
 export async function deleteUser(userId: string) {
-  // In demo mode, just delete the employee record
-  await deleteEmployee(userId);
+  const { error } = await supabase.functions.invoke('delete-user', {
+    body: { userId }
+  });
+  if (error) throw error;
 }
