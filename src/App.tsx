@@ -38,7 +38,7 @@ function App() {
               <Route path="scanner" element={<Scanner />} />
               <Route path="tasks" element={<Tasks />} />
             </Route>
-            <Route path="*" element={<Navigate to="/\" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AuthProvider>
       </AppProvider>
