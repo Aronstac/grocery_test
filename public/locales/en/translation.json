@@ -1,0 +1,36 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "deliveries": "Deliveries",
+    "management": "Management",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "welcome": "Welcome back!",
+    "loading": "Loading..."
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email address",
+    "password": "Password",
+    "demoMode": "Demo Mode: Use any email/password",
+    "createAccount": "Create new account",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "navigation": {
+    "home": "Home",
+    "stock": "Stock",
+    "route": "Route",
+    "gas": "Gas",
+    "report": "Report",
+    "scan": "Scan",
+    "tasks": "Tasks"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "logistics_specialist": "Logistics Manager",
+    "driver": "Delivery Driver",
+    "warehouse_worker": "Warehouse Staff"
+  }
+}
