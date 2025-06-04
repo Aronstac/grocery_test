@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, Upload, AlertTriangle } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 const ReportProblem: React.FC = () => {

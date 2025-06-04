@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Scan, ClipboardList, AlertTriangle, Phone, ArrowDownCircle, ArrowUpCircle, CheckCircle2 } from 'lucide-react';
+import { Package, Scan, ClipboardList, AlertTriangle, Phone, ArrowDownCircle, CheckCircle2 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import StatsCard from '../../components/ui/StatsCard';
 import { useAppContext } from '../../context/AppContext';

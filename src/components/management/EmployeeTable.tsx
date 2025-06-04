@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Eye, UserPlus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
-import { deleteEmployee, deleteUser } from '../../lib/supabase';
+import { deleteUser } from '../../lib/supabase';
 
 const EmployeeTable: React.FC = () => {
   const { employees } = useAppContext();

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Field, ErrorMessage, useFormikContext } from 'formik';
+import { ErrorMessage, useFormikContext } from 'formik';
 import { Search, MapPin, DollarSign, Package } from 'lucide-react';
-import { DELIVERY_LOCATIONS } from '../../../config/maps';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { DeliveryWizardValues } from './types';
 
 interface Supplier {
   id: string;
@@ -58,12 +59,11 @@ const mockSuppliers: Supplier[] = [
 const SupplierSelectionStep = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [selectedSupplier, setSelectedSupplier] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
-  const { setFieldValue, values } = useFormikContext<any>();
-  const markerClustererRef = useRef<any>(null);
+  const { setFieldValue } = useFormikContext<DeliveryWizardValues>();
+  const markerClustererRef = useRef<MarkerClusterer | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -126,7 +126,6 @@ const SupplierSelectionStep = () => {
       return marker;
     });
 
-    setMarkers(newMarkers);
 
     // Dynamically import MarkerClusterer
     import('@googlemaps/markerclusterer').then(({ MarkerClusterer }) => {

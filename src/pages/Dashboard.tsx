@@ -1,13 +1,11 @@
 import React from 'react';
-import { 
-  DollarSign, 
-  ShoppingCart, 
-  Package, 
-  TrendingUp, 
-  Users, 
+import {
+  DollarSign,
+  ShoppingCart,
+  Package,
   Clock,
   AlertTriangle,
-  Truck 
+  Truck
 } from 'lucide-react';
 
 import Card from '../components/ui/Card';

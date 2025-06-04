@@ -11,6 +11,7 @@ import LocationStep from './wizard/LocationStep';
 import TimeSlotStep from './wizard/TimeSlotStep';
 import OrderDetailsStep from './wizard/OrderDetailsStep';
 import ReviewStep from './wizard/ReviewStep';
+import { DeliveryWizardValues, OrderItem } from './wizard/types';
 
 interface DeliveryWizardProps {
   onClose: () => void;
@@ -75,7 +76,7 @@ const DeliveryWizard: React.FC<DeliveryWizardProps> = ({ onClose }) => {
     priority: Yup.string().oneOf(['standard', 'express', 'premium']).required('Priority is required'),
   });
 
-  const initialValues = {
+  const initialValues: DeliveryWizardValues = {
     deliveryId: generateDeliveryId(),
     customerInfo: {
       fullName: '',
@@ -124,7 +125,7 @@ const DeliveryWizard: React.FC<DeliveryWizardProps> = ({ onClose }) => {
     { number: 7, title: 'Review', icon: <Truck size={20} />, component: ReviewStep },
   ];
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: DeliveryWizardValues) => {
     try {
       await addDelivery({
         supplierId: values.supplier.id,
@@ -133,7 +134,7 @@ const DeliveryWizard: React.FC<DeliveryWizardProps> = ({ onClose }) => {
         expectedDate: values.timeSlot.date,
         totalAmount: calculateTotal(values.orderDetails.items),
         notes: values.orderDetails.specialHandling,
-        items: values.orderDetails.items.map((item: any) => ({
+        items: values.orderDetails.items.map((item: OrderItem) => ({
           productId: item.productId,
           productName: products.find(p => p.id === item.productId)?.name || '',
           quantity: item.quantity,
@@ -147,7 +148,7 @@ const DeliveryWizard: React.FC<DeliveryWizardProps> = ({ onClose }) => {
     }
   };
 
-  const calculateTotal = (items: any[]) => {
+  const calculateTotal = (items: OrderItem[]) => {
     return items.reduce((total, item) => {
       const product = products.find(p => p.id === item.productId);
       return total + (product?.price || 0) * item.quantity;
@@ -213,12 +214,12 @@ const DeliveryWizard: React.FC<DeliveryWizardProps> = ({ onClose }) => {
             </div>
           </div>
 
-          <Formik
+          <Formik<DeliveryWizardValues>
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, handleChange, setFieldValue }) => (
+            {() => (
               <Form className="space-y-6">
                 <CurrentStepComponent />
 

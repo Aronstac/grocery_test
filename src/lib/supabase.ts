@@ -6,7 +6,7 @@ import { mockProducts, mockDeliveries, mockEmployees } from '../data/mockData';
 // Mock authentication functions
 export const supabase = {
   auth: {
-    signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
+    signInWithPassword: async ({ email }: { email: string; password: string }) => {
       // In demo mode, accept any credentials
       return {
         data: {
@@ -43,7 +43,7 @@ export const supabase = {
         error: null
       };
     },
-    onAuthStateChange: (callback: Function) => {
+    onAuthStateChange: () => {
       // Return a mock subscription that does nothing
       return {
         data: { subscription: { unsubscribe: () => {} } }
@@ -98,6 +98,7 @@ export async function createDelivery(
   const newDelivery = {
     ...delivery,
     id: `del_${Date.now()}`,
+    items,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
