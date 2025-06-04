@@ -2,13 +2,14 @@ import React from 'react';
 import { useFormikContext } from 'formik';
 import { useAppContext } from '../../../context/AppContext';
 import { format } from 'date-fns';
+import { DeliveryWizardValues, OrderItem } from './types';
 
 const ReviewStep = () => {
-  const { values } = useFormikContext<any>();
+  const { values } = useFormikContext<DeliveryWizardValues>();
   const { products } = useAppContext();
 
   const calculateTotal = () => {
-    return values.orderDetails.items.reduce((total: number, item: any) => {
+    return values.orderDetails.items.reduce((total: number, item: OrderItem) => {
       const product = products.find(p => p.id === item.productId);
       return total + (product?.price || 0) * item.quantity;
     }, 0);
@@ -63,7 +64,7 @@ const ReviewStep = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {values.orderDetails.items.map((item: any, index: number) => {
+                  {values.orderDetails.items.map((item: OrderItem, index: number) => {
                     const product = products.find(p => p.id === item.productId);
                     return (
                       <tr key={index}>

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import Datepicker from 'tailwind-datepicker-react';
-import { format, addDays, setHours, setMinutes } from 'date-fns';
+import { addDays } from 'date-fns';
+import { DeliveryWizardValues } from './types';
 
 const TimeSlotStep = () => {
-  const { setFieldValue, values } = useFormikContext<any>();
+  const { setFieldValue } = useFormikContext<DeliveryWizardValues>();
   const [showDatePicker, setShowDatePicker] = React.useState(false);
 
   const minDate = addDays(new Date(), 1);

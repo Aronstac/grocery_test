@@ -2,10 +2,11 @@ import React from 'react';
 import { Field, ErrorMessage, useFormikContext, FieldArray } from 'formik';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 import { useAppContext } from '../../../context/AppContext';
+import { DeliveryWizardValues, OrderItem } from './types';
 
 const OrderDetailsStep = () => {
   const { products } = useAppContext();
-  const { values, setFieldValue } = useFormikContext<any>();
+  const { values, setFieldValue } = useFormikContext<DeliveryWizardValues>();
 
   const temperatureOptions = [
     { value: 'ambient', label: 'Ambient' },
@@ -32,7 +33,7 @@ const OrderDetailsStep = () => {
               </button>
             </div>
 
-            {values.orderDetails.items.map((item: any, index: number) => (
+            {values.orderDetails.items.map((item: OrderItem, index: number) => (
               <div key={index} className="flex items-start space-x-4 mb-4">
                 <div className="flex-1">
                   <Field

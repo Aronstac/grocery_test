@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { Field, ErrorMessage, useFormikContext } from 'formik';
 import { MapPin } from 'lucide-react';
+import { DeliveryWizardValues } from './types';
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     google: any;
   }
 }
@@ -12,7 +14,7 @@ const LocationStep = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
-  const { setFieldValue, values } = useFormikContext<any>();
+  const { setFieldValue } = useFormikContext<DeliveryWizardValues>();
 
   useEffect(() => {
     if (!mapRef.current) return;

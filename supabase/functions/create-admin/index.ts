@@ -1,4 +1,3 @@
-import { nanoid } from 'npm:nanoid@5.0.6';
 import { createClient } from 'npm:@supabase/supabase-js@2.39.7';
 
 const corsHeaders = {

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Field, ErrorMessage, useFormikContext } from 'formik';
+import { ErrorMessage, useFormikContext } from 'formik';
 import { Search, Package, AlertTriangle } from 'lucide-react';
 import { useAppContext } from '../../../context/AppContext';
+import { DeliveryWizardValues } from './types';
 
 const ProductSelectionStep = () => {
   const { products } = useAppContext();
-  const { setFieldValue, values } = useFormikContext<any>();
+  const { setFieldValue, values } = useFormikContext<DeliveryWizardValues>();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter active products and sort by name
@@ -17,7 +18,7 @@ const ProductSelectionStep = () => {
     )
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const handleProductSelect = (product: any) => {
+  const handleProductSelect = (product: Product) => {
     setFieldValue('selectedProduct', {
       id: product.id,
       name: product.name,

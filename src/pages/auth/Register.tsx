@@ -35,7 +35,7 @@ const Register: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: { adminEmail: string; adminPassword: string }) => {
     try {
       setIsSubmitting(true);
       setError(null);
@@ -51,8 +51,12 @@ const Register: React.FC = () => {
       }
 
       navigate('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Registration failed');
+      }
     } finally {
       setIsSubmitting(false);
     }

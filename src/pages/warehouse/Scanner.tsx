@@ -3,7 +3,7 @@ import { Scan, Package, CheckCircle, AlertTriangle } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 const Scanner: React.FC = () => {
-  const [scannedItems, setScannedItems] = useState([
+  const [scannedItems] = useState([
     { id: 1, code: 'PRD-001', name: 'Organic Bananas', location: 'A-12-3', status: 'success' },
     { id: 2, code: 'PRD-002', name: 'Whole Milk', location: 'B-05-1', status: 'error' }
   ]);

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import Card from '../ui/Card';
 import { GOOGLE_MAPS_CONFIG, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, DELIVERY_LOCATIONS } from '../../config/maps';
-import { Truck, Clock, CheckCircle, Layers, Navigation2, Volume2, VolumeX } from 'lucide-react';
+import { Truck, Clock, CheckCircle } from 'lucide-react';
 
 interface DeliveryMapProps {
   selectedDelivery?: Delivery;
@@ -258,17 +258,7 @@ const DeliveryMap: React.FC<DeliveryMapProps> = ({
       }
     });
 
-    // Add info windows
-    const warehouseInfo = new google.maps.InfoWindow({
-      content: `
-        <div class="p-2">
-          <h3 class="font-semibold">KPI Warehouse</h3>
-          <p class="text-sm text-gray-600">Main Distribution Center</p>
-          <p class="text-sm text-gray-600">Kyiv Polytechnic Institute</p>
-        </div>
-      `
-    });
-
+    // Add info window for selected delivery
     const deliveryInfo = new google.maps.InfoWindow({
       content: `
         <div class="p-2">
