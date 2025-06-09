@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Eye, UserPlus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
-import { deleteUser } from '../../lib/supabase';
+import { apiClient } from '../../lib/api';
 
 const EmployeeTable: React.FC = () => {
-  const { employees } = useAppContext();
+  const { employees, refreshData } = useAppContext();
   const [sortField, setSortField] = useState<keyof Employee>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterDepartment, setFilterDepartment] = useState<string>('');
@@ -29,11 +29,11 @@ const EmployeeTable: React.FC = () => {
     if (confirmDelete) {
       try {
         setIsDeleting(true);
-        await deleteUser(id);
-        // The employee record will be automatically deleted by the database trigger
+        await apiClient.deleteEmployee(id);
+        await refreshData(); // Refresh the data after deletion
       } catch (error) {
-        console.error('Failed to delete user:', error);
-        alert('Failed to delete user. Please try again.');
+        console.error('Failed to delete employee:', error);
+        alert('Failed to delete employee. Please try again.');
       } finally {
         setIsDeleting(false);
       }

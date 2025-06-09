@@ -7,15 +7,15 @@ class ApiClient {
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('supabase.auth.token');
+    this.token = localStorage.getItem('auth_token');
   }
 
   setToken(token: string | null) {
     this.token = token;
     if (token) {
-      localStorage.setItem('supabase.auth.token', token);
+      localStorage.setItem('auth_token', token);
     } else {
-      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('auth_token');
     }
   }
 
@@ -272,6 +272,158 @@ class ApiClient {
     return this.request(`/employees/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  // Store endpoints
+  async getStores() {
+    return this.request('/stores');
+  }
+
+  async getStore(id: string) {
+    return this.request(`/stores/${id}`);
+  }
+
+  // Supplier endpoints
+  async getSuppliers(params?: {
+    city?: string;
+    region?: string;
+    is_active?: boolean;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+    
+    const query = searchParams.toString();
+    return this.request(`/suppliers${query ? `?${query}` : ''}`);
+  }
+
+  // Inventory endpoints
+  async getInventory(params?: {
+    warehouse_id?: string;
+    low_stock?: boolean;
+    search?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+    
+    const query = searchParams.toString();
+    return this.request(`/inventory${query ? `?${query}` : ''}`);
+  }
+
+  // Gas card endpoints
+  async getGasCards(params?: {
+    employee_id?: string;
+    status?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value);
+        }
+      });
+    }
+    
+    const query = searchParams.toString();
+    return this.request(`/gas-cards${query ? `?${query}` : ''}`);
+  }
+
+  async createGasCardTransaction(cardId: string, data: {
+    transaction_type: string;
+    amount: number;
+    merchant_name?: string;
+    location?: string;
+    fuel_type?: string;
+    fuel_quantity_liters?: number;
+    odometer_reading?: number;
+  }) {
+    return this.request(`/gas-cards/${cardId}/transactions`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Reports endpoints
+  async getReports(params?: {
+    type?: string;
+    status?: string;
+    priority?: string;
+    submitted_by?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value);
+        }
+      });
+    }
+    
+    const query = searchParams.toString();
+    return this.request(`/reports${query ? `?${query}` : ''}`);
+  }
+
+  async createReport(data: {
+    type: string;
+    priority?: string;
+    title: string;
+    description: string;
+    location?: string;
+    delivery_id?: string;
+    product_id?: string;
+    images?: any;
+  }) {
+    return this.request('/reports', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Notifications endpoints
+  async getNotifications(params?: {
+    is_read?: boolean;
+    priority?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+    
+    const query = searchParams.toString();
+    return this.request(`/notifications${query ? `?${query}` : ''}`);
+  }
+
+  async markNotificationAsRead(id: string) {
+    return this.request(`/notifications/${id}/read`, {
+      method: 'PATCH',
+    });
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/mark-all-read', {
+      method: 'PATCH',
+    });
+  }
+
+  async getUnreadNotificationsCount() {
+    return this.request('/notifications/unread/count');
   }
 }
 

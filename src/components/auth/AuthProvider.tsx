@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem('supabase.auth.token');
+      const token = localStorage.getItem('auth_token');
       if (!token) {
         setLoading(false);
         return;
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Auth check failed:', error);
       // Clear invalid token
-      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('auth_token');
       apiClient.setToken(null);
     } finally {
       setLoading(false);
