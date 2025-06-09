@@ -250,7 +250,7 @@ const ProductTable: React.FC = () => {
                       <div className="flex items-center">
                         {product.imageUrl && (
                           <div className="flex-shrink-0 h-10 w-10 mr-3">
-                            <img className="h-10 w-10 rounded-md object-cover" src={product.imageUrl} alt={product.name} />
+                            <img className="h-10 w-10 rounded-md object-cover\" src={product.imageUrl} alt={product.name} />
                           </div>
                         )}
                         <div>
