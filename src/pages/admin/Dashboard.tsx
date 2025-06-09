@@ -12,7 +12,7 @@ import Card from '../../components/ui/Card';
 import StatsCard from '../../components/ui/StatsCard';
 import LineChart from '../../components/charts/LineChart';
 import BarChart from '../../components/charts/BarChart';
-import { mockFinancialData } from '../../data/mockData';
+import { mockFinancialData } from '../../data/financialData';
 import { useAppContext } from '../../context/AppContext';
 
 const AdminDashboard: React.FC = () => {
