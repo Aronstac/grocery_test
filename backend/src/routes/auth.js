@@ -3,6 +3,7 @@ import { supabase, supabaseAdmin } from '../config/supabase.js';
 import { validateRequest, schemas } from '../middleware/validation.js';
 import { logger } from '../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 
 const router = express.Router();
 
