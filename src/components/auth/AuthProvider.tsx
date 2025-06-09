@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
 import { useAppContext } from '../../context/AppContext';
+import { apiClient } from '../../lib/api';
 
 interface AuthContextType {
   signOut: () => Promise<void>;
@@ -23,45 +23,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        // In demo mode, we'll set a mock user with demo data
-        setCurrentUser({
-          id: 'demo-user-id',
-          email: session.user.email || 'demo@example.com',
-          role: 'admin',
-          storeId: 'demo-store-id',
-          storeName: 'GroceryOps Demo Store'
-        });
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setCurrentUser({
-          id: 'demo-user-id',
-          email: session.user.email || 'demo@example.com',
-          role: 'admin',
-          storeId: 'demo-store-id',
-          storeName: 'GroceryOps Demo Store'
-        });
-      } else {
-        setCurrentUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    checkAuthStatus();
   }, []);
 
+  const checkAuthStatus = async () => {
+    try {
+      const token = localStorage.getItem('supabase.auth.token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      apiClient.setToken(token);
+      const response = await apiClient.getCurrentUser();
+      
+      if (response.user && response.employee) {
+        setCurrentUser({
+          id: response.user.id,
+          email: response.user.email,
+          role: response.employee.role,
+          storeId: response.employee.store_id,
+          storeName: response.employee.stores?.name || 'Unknown Store'
+        });
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      // Clear invalid token
+      localStorage.removeItem('supabase.auth.token');
+      apiClient.setToken(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setCurrentUser(null);
-    navigate('/login');
+    try {
+      await apiClient.signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      setCurrentUser(null);
+      navigate('/login');
+    }
   };
 
   if (loading) {

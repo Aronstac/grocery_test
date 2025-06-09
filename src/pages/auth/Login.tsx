@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { useAppContext } from '../../context/AppContext';
+import { apiClient } from '../../lib/api';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { setCurrentUser } = useAppContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,14 +18,19 @@ const Login: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) throw error;
+      const response = await apiClient.signIn(email, password);
       
-      navigate('/');
+      if (response.user && response.employee) {
+        setCurrentUser({
+          id: response.user.id,
+          email: response.user.email,
+          role: response.employee.role,
+          storeId: response.employee.store_id,
+          storeName: response.employee.stores?.name || 'Unknown Store'
+        });
+        
+        navigate('/');
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -46,9 +53,6 @@ const Login: React.FC = () => {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Sign in to your account
-        </p>
-        <p className="mt-2 text-center text-sm text-amber-600">
-          Demo Mode: Use any email/password
         </p>
       </div>
 

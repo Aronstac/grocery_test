@@ -3,17 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { supabase } from '../../lib/supabase';
+import { apiClient } from '../../lib/api';
 
 const validationSchema = Yup.object().shape({
   storeName: Yup.string().required('Store name is required'),
   storeAddress: Yup.string().required('Store address is required'),
   storeCity: Yup.string().required('City is required'),
-  storeRegion: Yup.string().required('Region is required'),
+  storeState: Yup.string(),
   storeCountry: Yup.string().required('Country is required'),
   storePhone: Yup.string()
-    .matches(/^\+?[0-9\s-()]+$/, 'Invalid phone number format')
-    .required('Phone is required'),
+    .matches(/^\+?[0-9\s-()]+$/, 'Invalid phone number format'),
   storeEmail: Yup.string().email('Invalid email').required('Email is required'),
   adminName: Yup.string()
     .min(2, 'Name must be at least 2 characters')
@@ -35,22 +34,31 @@ const Register: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (values: { adminEmail: string; adminPassword: string }) => {
+  const handleSubmit = async (values: any) => {
     try {
       setIsSubmitting(true);
       setError(null);
 
-      // In demo mode, just sign in with the provided credentials
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: values.adminEmail,
-        password: values.adminPassword,
+      await apiClient.createAdmin({
+        storeName: values.storeName,
+        storeAddress: values.storeAddress,
+        storeCity: values.storeCity,
+        storeState: values.storeState,
+        storeCountry: values.storeCountry,
+        storePhone: values.storePhone,
+        storeEmail: values.storeEmail,
+        adminName: values.adminName,
+        adminEmail: values.adminEmail,
+        adminPassword: values.adminPassword,
       });
 
-      if (signInError) {
-        throw signInError;
-      }
+      // Redirect to login with success message
+      navigate('/login', { 
+        state: { 
+          message: 'Account created successfully! Please sign in.' 
+        } 
+      });
 
-      navigate('/');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -74,9 +82,6 @@ const Register: React.FC = () => {
         <p className="mt-2 text-center text-sm text-gray-600">
           Set up your store and admin account
         </p>
-        <p className="mt-2 text-center text-sm text-amber-600">
-          Demo Mode: All registrations will succeed
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
@@ -86,8 +91,8 @@ const Register: React.FC = () => {
               storeName: '',
               storeAddress: '',
               storeCity: '',
-              storeRegion: '',
-              storeCountry: '',
+              storeState: '',
+              storeCountry: 'UA',
               storePhone: '',
               storeEmail: '',
               adminName: '',
@@ -143,16 +148,16 @@ const Register: React.FC = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="storeRegion" className="block text-sm font-medium text-gray-700">
-                        Region
+                      <label htmlFor="storeState" className="block text-sm font-medium text-gray-700">
+                        State/Region
                       </label>
                       <Field
                         type="text"
-                        name="storeRegion"
+                        name="storeState"
                         className="mt-1 block w-full h-12 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter region"
+                        placeholder="Enter state/region"
                       />
-                      <ErrorMessage name="storeRegion" component="div" className="mt-1 text-sm text-red-600" />
+                      <ErrorMessage name="storeState" component="div" className="mt-1 text-sm text-red-600" />
                     </div>
 
                     <div>
@@ -160,11 +165,18 @@ const Register: React.FC = () => {
                         Country
                       </label>
                       <Field
-                        type="text"
+                        as="select"
                         name="storeCountry"
                         className="mt-1 block w-full h-12 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter country"
-                      />
+                      >
+                        <option value="UA">Ukraine</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="OTHER">Other</option>
+                      </Field>
                       <ErrorMessage name="storeCountry" component="div" className="mt-1 text-sm text-red-600" />
                     </div>
 
