@@ -12,11 +12,12 @@ import Card from '../components/ui/Card';
 import StatsCard from '../components/ui/StatsCard';
 import LineChart from '../components/charts/LineChart';
 import BarChart from '../components/charts/BarChart';
-import { mockFinancialData } from '../data/financialData';
 import { useAppContext } from '../context/AppContext';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 const Dashboard: React.FC = () => {
   const { products, deliveries } = useAppContext();
+  const { data: analyticsData, loading: analyticsLoading } = useAnalytics();
 
   // Upcoming deliveries
   const upcomingDeliveries = deliveries
@@ -28,13 +29,16 @@ const Dashboard: React.FC = () => {
     .filter(p => p.stock <= p.reorderLevel)
     .slice(0, 5);
 
+  // Calculate today's revenue from analytics data
+  const todaysRevenue = analyticsData?.dailyRevenue?.[analyticsData.dailyRevenue.length - 1]?.revenue || 0;
+
   // Line chart data
-  const revenueData = {
-    labels: mockFinancialData.dailyRevenue.map(day => new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+  const revenueData = analyticsData ? {
+    labels: analyticsData.dailyRevenue.map(day => new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
     datasets: [
       {
         label: 'Revenue',
-        data: mockFinancialData.dailyRevenue.map(day => day.revenue),
+        data: analyticsData.dailyRevenue.map(day => day.revenue),
         borderColor: '#1d4ed8',
         backgroundColor: 'rgba(29, 78, 216, 0.1)',
         tension: 0.3,
@@ -42,22 +46,22 @@ const Dashboard: React.FC = () => {
       },
       {
         label: 'Expenses',
-        data: mockFinancialData.dailyRevenue.map(day => day.expenses),
+        data: analyticsData.dailyRevenue.map(day => day.expenses),
         borderColor: '#f97316',
         backgroundColor: 'rgba(249, 115, 22, 0.1)',
         tension: 0.3,
         fill: true,
       }
     ],
-  };
+  } : null;
 
   // Bar chart data
-  const categorySalesData = {
-    labels: mockFinancialData.topSellingCategories.map(cat => cat.category),
+  const categorySalesData = analyticsData ? {
+    labels: analyticsData.topSellingCategories.map(cat => cat.category),
     datasets: [
       {
         label: 'Sales ($)',
-        data: mockFinancialData.topSellingCategories.map(cat => cat.sales),
+        data: analyticsData.topSellingCategories.map(cat => cat.sales),
         backgroundColor: [
           'rgba(29, 78, 216, 0.7)',
           'rgba(13, 148, 136, 0.7)',
@@ -75,7 +79,26 @@ const Dashboard: React.FC = () => {
         borderWidth: 1,
       },
     ],
-  };
+  } : null;
+
+  if (analyticsLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Loading dashboard data...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -88,7 +111,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard 
           title="Today's Revenue" 
-          value={`$${mockFinancialData.dailyRevenue[6].revenue.toFixed(2)}`} 
+          value={`$${todaysRevenue.toFixed(2)}`} 
           icon={<DollarSign size={24} />} 
           change={8.2} 
           trend="up" 
@@ -96,7 +119,7 @@ const Dashboard: React.FC = () => {
         />
         <StatsCard 
           title="Orders" 
-          value="37" 
+          value={deliveries.length} 
           icon={<ShoppingCart size={24} />} 
           change={-2.1} 
           trend="down" 
@@ -119,10 +142,22 @@ const Dashboard: React.FC = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Revenue vs Expenses (Last 7 Days)" className="col-span-1">
-          <LineChart data={revenueData} height={250} />
+          {revenueData ? (
+            <LineChart data={revenueData} height={250} />
+          ) : (
+            <div className="h-[250px] flex items-center justify-center text-gray-500">
+              No data available
+            </div>
+          )}
         </Card>
         <Card title="Top-Selling Categories" className="col-span-1">
-          <BarChart data={categorySalesData} height={250} />
+          {categorySalesData ? (
+            <BarChart data={categorySalesData} height={250} />
+          ) : (
+            <div className="h-[250px] flex items-center justify-center text-gray-500">
+              No data available
+            </div>
+          )}
         </Card>
       </div>
       

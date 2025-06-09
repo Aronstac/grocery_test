@@ -92,6 +92,28 @@ class ApiClient {
     return this.request('/auth/me');
   }
 
+  // Analytics endpoints
+  async getAnalyticsSummary(params?: {
+    date_from?: string;
+    date_to?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value);
+        }
+      });
+    }
+    
+    const query = searchParams.toString();
+    return this.request(`/reports/analytics/summary${query ? `?${query}` : ''}`);
+  }
+
+  async getDashboardStats() {
+    return this.request('/analytics/dashboard');
+  }
+
   // Invitation endpoints
   async createInvitation(data: {
     email: string;

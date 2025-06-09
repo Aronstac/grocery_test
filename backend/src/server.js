@@ -22,6 +22,7 @@ import gasCardRoutes from './routes/gasCards.js';
 import reportRoutes from './routes/reports.js';
 import invitationRoutes from './routes/invitations.js';
 import notificationRoutes from './routes/notifications.js';
+import analyticsRoutes from './routes/analytics.js';
 
 // Load environment variables
 dotenv.config();
@@ -74,6 +75,7 @@ app.use('/api/gas-cards', gasCardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/invitations', invitationRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Error handling middleware
 app.use(notFoundHandler);
