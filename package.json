@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "test": "jest",
     "preview": "vite preview",
-    "seed": "tsx src/lib/seed.ts"
+    "seed": "tsx backend/seed.ts"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.6",
