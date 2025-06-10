@@ -1,138 +1,173 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// Product Types
-interface Product {
+// User Types
+export interface User {
   id: string;
-  name: string;
-  category: string;
-  price: number;
-  cost: number;
-  stock: number;
-  reorderLevel: number;
-  supplier: string;
-  imageUrl?: string;
-  expiryDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Delivery Types
-interface Delivery {
-  id: string;
-  supplierId: string;
-  supplierName: string;
-  status: 'pending' | 'in-transit' | 'delivered' | 'canceled';
-  items: DeliveryItem[];
-  expectedDate: string;
-  deliveredDate?: string;
-  totalAmount: number;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface DeliveryItem {
-  productId: string;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
-// Employee Types
-interface Employee {
-  id: string;
-  name: string;
-  position: string;
   email: string;
-  phone: string;
-  avatar?: string;
-  department: string;
-  startDate: string;
-  status: 'active' | 'on-leave' | 'terminated';
   role: 'admin' | 'logistics_specialist' | 'driver' | 'warehouse_worker';
   storeId: string;
   storeName?: string;
 }
 
+// Product Types
+export interface Product {
+  id: string;
+  name: string;
+  name_ua?: string;
+  description?: string;
+  category: string;
+  sku?: string;
+  barcode?: string;
+  price: number;
+  cost?: number;
+  stock: number;
+  reorder_level: number;
+  supplier_id?: string;
+  image_url?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Delivery Types
+export interface Delivery {
+  id: string;
+  delivery_number: string;
+  supplier_id: string;
+  supplier_name: string;
+  store_id: string;
+  status: 'pending' | 'in_transit' | 'delivered' | 'canceled';
+  priority: number;
+  expected_date: string;
+  actual_delivery_date?: string;
+  total_amount: number;
+  total_items: number;
+  driver_id?: string;
+  special_instructions?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  items: DeliveryItem[];
+}
+
+export interface DeliveryItem {
+  id: string;
+  delivery_id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  received_quantity?: number;
+  damaged_quantity?: number;
+}
+
+// Employee Types
+export interface Employee {
+  id: string;
+  name: string;
+  name_ua?: string;
+  email: string;
+  phone?: string;
+  position: string;
+  department: string;
+  role: 'admin' | 'logistics_specialist' | 'driver' | 'warehouse_worker';
+  status: 'active' | 'on_leave' | 'terminated';
+  store_id: string;
+  avatar?: string;
+  hire_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Store Types
-interface Store {
+export interface Store {
   id: string;
   name: string;
   address: string;
   city: string;
-  state: string;
+  region: string;
   country: string;
-  phone: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Invitation Types
-interface Invitation {
-  id: string;
-  email: string;
-  role: Employee['role'];
-  storeId: string;
-  token: string;
-  status: 'pending' | 'accepted' | 'expired';
-  expiresAt: string;
-  createdAt: string;
-}
-
-// Financial Types
-interface FinancialData {
-  date: string;
-  revenue: number;
-  expenses: number;
-  profit: number;
-}
-
-// Delivery Point Types
-interface DeliveryPoint {
-  id: string;
-  name: string;
-  address: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  lastUsed: string;
+  postal_code?: string;
+  phone?: string;
+  email?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 // Gas Card Types
-interface GasCard {
+export interface GasCard {
   id: string;
-  cardNumber: string;
-  employeeId: string;
+  card_number: string;
+  employee_id: string;
   balance: number;
+  credit_limit?: number;
   status: 'active' | 'blocked' | 'expired';
-  expiryDate: string;
-  lastUsed?: string;
+  expiry_date: string;
+  last_used_at?: string;
+  daily_limit?: number;
+  monthly_limit?: number;
+  created_at: string;
+  updated_at: string;
+  employee?: Employee;
 }
 
-// Problem Report Types
-interface ProblemReport {
+// Report Types
+export interface Report {
   id: string;
-  employeeId: string;
+  report_number: string;
+  submitted_by: string;
   type: 'delivery' | 'product' | 'vehicle' | 'other';
-  description: string;
-  imageUrl?: string;
-  status: 'pending' | 'in-progress' | 'resolved';
   priority: 'low' | 'medium' | 'high';
-  createdAt: string;
-  updatedAt: string;
-  resolvedAt?: string;
+  title: string;
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  assigned_to?: string;
+  created_at: string;
+  updated_at: string;
+  submitted_by_employee?: Employee;
+  assigned_to_employee?: Employee;
 }
 
-// Auth Types
-interface UserSession {
-  user: {
-    id: string;
-    email: string;
-    role: Employee['role'];
-    storeId: string;
-    storeName?: string;
+// Notification Types
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  sender_id?: string;
+  type: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  read_at?: string;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  action_url?: string;
+  created_at: string;
+}
+
+// Analytics Types
+export interface AnalyticsSummary {
+  stats: {
+    totalProducts: number;
+    totalDeliveries: number;
+    activeEmployees: number;
+    lowStockItems: number;
+    totalRevenue: number;
+    pendingDeliveries: number;
+    todaysRevenue: number;
   };
-  expires_at: number;
+  charts: {
+    dailyRevenue: Array<{
+      date: string;
+      revenue: number;
+      expenses: number;
+      profit: number;
+    }>;
+    monthlySales: Array<{
+      month: string;
+      revenue: number;
+    }>;
+    topSellingCategories: Array<{
+      category: string;
+      sales: number;
+    }>;
+  };
 }

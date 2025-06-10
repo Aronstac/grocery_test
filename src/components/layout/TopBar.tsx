@@ -1,20 +1,13 @@
 import React from 'react';
-import { Bell, Search, Menu, User, Globe2 } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext';
-import { useTranslation } from 'react-i18next';
+import { Bell, Search, Menu, User } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface TopBarProps {
   toggleSidebar: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({ toggleSidebar }) => {
-  const { currentUser } = useAppContext();
-  const { t, i18n } = useTranslation();
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'uk' : 'en';
-    i18n.changeLanguage(newLang);
-  };
+  const { user } = useAuth();
 
   return (
     <header className="bg-white border-b border-gray-200 flex items-center h-16 px-4 md:px-6 sticky top-0 z-10">
@@ -29,7 +22,7 @@ const TopBar: React.FC<TopBarProps> = ({ toggleSidebar }) => {
         <div className="relative">
           <input
             type="text"
-            placeholder={t('common.search')}
+            placeholder="Search..."
             className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
@@ -37,17 +30,6 @@ const TopBar: React.FC<TopBarProps> = ({ toggleSidebar }) => {
       </div>
 
       <div className="flex items-center ml-auto space-x-4">
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center text-gray-500 hover:text-gray-700"
-          title={i18n.language === 'en' ? 'Switch to Ukrainian' : 'Перейти на англійську'}
-        >
-          <Globe2 size={20} />
-          <span className="ml-1 text-sm font-medium hidden sm:inline">
-            {i18n.language === 'en' ? 'UK' : 'EN'}
-          </span>
-        </button>
-
         <button className="relative text-gray-500 hover:text-gray-700">
           <Bell size={20} />
           <span className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 flex items-center justify-center text-white text-xs">
@@ -61,10 +43,10 @@ const TopBar: React.FC<TopBarProps> = ({ toggleSidebar }) => {
           </div>
           <div className="hidden sm:block">
             <p className="text-sm font-medium text-gray-700">
-              {currentUser?.email}
+              {user?.email}
             </p>
-            <p className="text-xs text-gray-500">
-              {t(`roles.${currentUser?.role}`)}
+            <p className="text-xs text-gray-500 capitalize">
+              {user?.role?.replace('_', ' ')}
             </p>
           </div>
         </div>

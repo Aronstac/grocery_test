@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
-import { apiClient } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { setCurrentUser } = useAppContext();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,20 +16,7 @@ const Login: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await apiClient.signIn(email, password);
-      
-      if (response.user && response.employee) {
-        setCurrentUser({
-          id: response.user.id,
-          email: response.user.email,
-          role: response.employee.role,
-          storeId: response.employee.store_id,
-          storeName: response.employee.stores?.name || 'Unknown Store'
-        });
-        
-        navigate('/');
-      }
+      await signIn(email, password);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

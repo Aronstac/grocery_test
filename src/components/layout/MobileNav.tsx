@@ -1,21 +1,19 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   LayoutDashboard,
   Package, 
   Truck, 
   Users, 
-  Map,
+  Store,
   CreditCard,
   AlertCircle,
-  Scan,
-  ClipboardList,
-  Boxes
+  Bell
 } from 'lucide-react';
 
 const MobileNav: React.FC = () => {
-  const { currentUser } = useAppContext();
+  const { user } = useAuth();
 
   const getNavItems = () => {
     const commonItems = [
@@ -24,27 +22,25 @@ const MobileNav: React.FC = () => {
 
     const roleSpecificItems = {
       admin: [
-        { path: '/inventory', icon: <Boxes size={20} />, label: 'Stock' },
+        { path: '/products', icon: <Package size={20} />, label: 'Products' },
         { path: '/deliveries', icon: <Truck size={20} />, label: 'Deliveries' },
-        { path: '/management', icon: <Users size={20} />, label: 'Staff' },
+        { path: '/employees', icon: <Users size={20} />, label: 'Staff' },
       ],
       logistics_specialist: [
-        { path: '/inventory', icon: <Package size={20} />, label: 'Stock' },
+        { path: '/products', icon: <Package size={20} />, label: 'Products' },
         { path: '/deliveries', icon: <Truck size={20} />, label: 'Deliveries' },
       ],
       driver: [
-        { path: '/route', icon: <Map size={20} />, label: 'Route' },
-        { path: '/gas-card', icon: <CreditCard size={20} />, label: 'Gas' },
-        { path: '/report-problem', icon: <AlertCircle size={20} />, label: 'Report' },
+        { path: '/deliveries', icon: <Truck size={20} />, label: 'Deliveries' },
+        { path: '/gas-cards', icon: <CreditCard size={20} />, label: 'Gas' },
       ],
       warehouse_worker: [
-        { path: '/scanner', icon: <Scan size={20} />, label: 'Scan' },
-        { path: '/tasks', icon: <ClipboardList size={20} />, label: 'Tasks' },
-        { path: '/report-problem', icon: <AlertCircle size={20} />, label: 'Report' },
+        { path: '/products', icon: <Package size={20} />, label: 'Products' },
+        { path: '/reports', icon: <AlertCircle size={20} />, label: 'Report' },
       ],
     };
 
-    return [...commonItems, ...(roleSpecificItems[currentUser?.role || 'logistics_specialist'] || [])];
+    return [...commonItems, ...(roleSpecificItems[user?.role || 'warehouse_worker'] || [])];
   };
 
   const navItems = getNavItems();

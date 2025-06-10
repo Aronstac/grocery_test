@@ -1,87 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DollarSign,
   ShoppingCart,
   Package,
-  Clock,
+  Truck,
   AlertTriangle,
-  Truck
+  Clock
 } from 'lucide-react';
-
-import Card from '../components/ui/Card';
-import StatsCard from '../components/ui/StatsCard';
-import LineChart from '../components/charts/LineChart';
-import BarChart from '../components/charts/BarChart';
-import { useAppContext } from '../context/AppContext';
-import { useAnalytics } from '../hooks/useAnalytics';
+import { useAppContext } from '../contexts/AppContext';
+import { apiClient } from '../api/client';
 
 const Dashboard: React.FC = () => {
-  const { products, deliveries } = useAppContext();
-  const { data: analyticsData, loading: analyticsLoading } = useAnalytics();
+  const { products, deliveries, employees } = useAppContext();
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Upcoming deliveries
-  const upcomingDeliveries = deliveries
-    .filter(d => d.status === 'pending' || d.status === 'in-transit')
-    .slice(0, 5);
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
-  // Low stock products
-  const lowStockProducts = products
-    .filter(p => p.stock <= p.reorderLevel)
-    .slice(0, 5);
+  const fetchAnalytics = async () => {
+    try {
+      const response = await apiClient.getAnalyticsSummary();
+      setAnalytics(response);
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Calculate today's revenue from analytics data
-  const todaysRevenue = analyticsData?.dailyRevenue?.[analyticsData.dailyRevenue.length - 1]?.revenue || 0;
-
-  // Line chart data
-  const revenueData = analyticsData ? {
-    labels: analyticsData.dailyRevenue.map(day => new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-    datasets: [
-      {
-        label: 'Revenue',
-        data: analyticsData.dailyRevenue.map(day => day.revenue),
-        borderColor: '#1d4ed8',
-        backgroundColor: 'rgba(29, 78, 216, 0.1)',
-        tension: 0.3,
-        fill: true,
-      },
-      {
-        label: 'Expenses',
-        data: analyticsData.dailyRevenue.map(day => day.expenses),
-        borderColor: '#f97316',
-        backgroundColor: 'rgba(249, 115, 22, 0.1)',
-        tension: 0.3,
-        fill: true,
-      }
-    ],
-  } : null;
-
-  // Bar chart data
-  const categorySalesData = analyticsData ? {
-    labels: analyticsData.topSellingCategories.map(cat => cat.category),
-    datasets: [
-      {
-        label: 'Sales ($)',
-        data: analyticsData.topSellingCategories.map(cat => cat.sales),
-        backgroundColor: [
-          'rgba(29, 78, 216, 0.7)',
-          'rgba(13, 148, 136, 0.7)',
-          'rgba(249, 115, 22, 0.7)',
-          'rgba(139, 92, 246, 0.7)',
-          'rgba(236, 72, 153, 0.7)',
-        ],
-        borderColor: [
-          'rgba(29, 78, 216, 1)',
-          'rgba(13, 148, 136, 1)',
-          'rgba(249, 115, 22, 1)',
-          'rgba(139, 92, 246, 1)',
-          'rgba(236, 72, 153, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  } : null;
-
-  if (analyticsLoading) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <div>
@@ -100,6 +49,10 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  const stats = analytics?.stats || {};
+  const upcomingDeliveries = deliveries.filter(d => d.status === 'pending' || d.status === 'in_transit').slice(0, 5);
+  const lowStockProducts = products.filter(p => p.stock <= p.reorder_level).slice(0, 5);
+
   return (
     <div className="space-y-6">
       <div>
@@ -109,138 +62,147 @@ const Dashboard: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard 
-          title="Today's Revenue" 
-          value={`$${todaysRevenue.toFixed(2)}`} 
-          icon={<DollarSign size={24} />} 
-          change={8.2} 
-          trend="up" 
-          iconColor="bg-green-100 text-green-600"
-        />
-        <StatsCard 
-          title="Orders" 
-          value={deliveries.length} 
-          icon={<ShoppingCart size={24} />} 
-          change={-2.1} 
-          trend="down" 
-          iconColor="bg-amber-100 text-amber-600"
-        />
-        <StatsCard 
-          title="Inventory Items" 
-          value={products.length} 
-          icon={<Package size={24} />} 
-          iconColor="bg-blue-100 text-blue-600"
-        />
-        <StatsCard 
-          title="Pending Deliveries" 
-          value={deliveries.filter(d => d.status === 'pending').length} 
-          icon={<Truck size={24} />} 
-          iconColor="bg-indigo-100 text-indigo-600"
-        />
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Today's Revenue</p>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">
+                ${(stats.todaysRevenue || 0).toFixed(2)}
+              </p>
+            </div>
+            <div className="rounded-full p-3 bg-green-100 text-green-600">
+              <DollarSign size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Total Orders</p>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">{deliveries.length}</p>
+            </div>
+            <div className="rounded-full p-3 bg-amber-100 text-amber-600">
+              <ShoppingCart size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Inventory Items</p>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">{products.length}</p>
+            </div>
+            <div className="rounded-full p-3 bg-blue-100 text-blue-600">
+              <Package size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Pending Deliveries</p>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">
+                {deliveries.filter(d => d.status === 'pending').length}
+              </p>
+            </div>
+            <div className="rounded-full p-3 bg-indigo-100 text-indigo-600">
+              <Truck size={24} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Revenue vs Expenses (Last 7 Days)" className="col-span-1">
-          {revenueData ? (
-            <LineChart data={revenueData} height={250} />
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-gray-500">
-              No data available
-            </div>
-          )}
-        </Card>
-        <Card title="Top-Selling Categories" className="col-span-1">
-          {categorySalesData ? (
-            <BarChart data={categorySalesData} height={250} />
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-gray-500">
-              No data available
-            </div>
-          )}
-        </Card>
-      </div>
-      
       {/* Alerts and upcoming */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Low Stock Alerts */}
-        <Card 
-          title="Low Stock Alerts" 
-          icon={<AlertTriangle size={20} className="text-amber-500" />}
-          className="col-span-1"
-        >
-          {lowStockProducts.length > 0 ? (
-            <div className="divide-y divide-gray-100">
-              {lowStockProducts.map((product) => (
-                <div key={product.id} className="py-2 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 rounded overflow-hidden mr-3">
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name} 
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-gray-500">
-                        <span className="text-red-600 font-semibold">{product.stock}</span> remaining (Min: {product.reorderLevel})
-                      </p>
-                    </div>
-                  </div>
-                  <button className="text-xs text-white bg-blue-600 px-2 py-1 rounded hover:bg-blue-700 transition-colors">
-                    Reorder
-                  </button>
-                </div>
-              ))}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+            <h3 className="font-medium text-gray-800">Low Stock Alerts</h3>
+            <div className="text-gray-500">
+              <AlertTriangle size={20} className="text-amber-500" />
             </div>
-          ) : (
-            <div className="py-8 text-center text-gray-500">
-              <p>No low stock items!</p>
-            </div>
-          )}
-        </Card>
-        
-        {/* Upcoming Deliveries */}
-        <Card 
-          title="Upcoming Deliveries" 
-          icon={<Clock size={20} className="text-blue-500" />}
-          className="col-span-1"
-        >
-          {upcomingDeliveries.length > 0 ? (
-            <div className="divide-y divide-gray-100">
-              {upcomingDeliveries.map((delivery) => (
-                <div key={delivery.id} className="py-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {delivery.supplierName}{' '}
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${
-                          delivery.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {delivery.status === 'pending' ? 'Pending' : 'In Transit'}
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Expected: {new Date(delivery.expectedDate).toLocaleDateString()} - ${delivery.totalAmount.toFixed(2)}
-                      </p>
+          </div>
+          <div className="p-6">
+            {lowStockProducts.length > 0 ? (
+              <div className="divide-y divide-gray-100">
+                {lowStockProducts.map((product) => (
+                  <div key={product.id} className="py-2 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded overflow-hidden mr-3">
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name} 
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{product.name}</p>
+                        <p className="text-xs text-gray-500">
+                          <span className="text-red-600 font-semibold">{product.stock}</span> remaining (Min: {product.reorderLevel})
+                        </p>
+                      </div>
                     </div>
-                    <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                      View
+                    <button className="text-xs text-white bg-blue-600 px-2 py-1 rounded hover:bg-blue-700 transition-colors">
+                      Reorder
                     </button>
                   </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {delivery.items.length} items
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-gray-500">
+                <p>No low stock items!</p>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Upcoming Deliveries */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+            <h3 className="font-medium text-gray-800">Upcoming Deliveries</h3>
+            <div className="text-gray-500">
+              <Clock size={20} className="text-blue-500" />
+            </div>
+          </div>
+          <div className="p-6">
+            {upcomingDeliveries.length > 0 ? (
+              <div className="divide-y divide-gray-100">
+                {upcomingDeliveries.map((delivery) => (
+                  <div key={delivery.id} className="py-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium">
+                          {delivery.supplierName}{' '}
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${
+                            delivery.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {delivery.status === 'pending' ? 'Pending' : 'In Transit'}
+                          </span>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Expected: {new Date(delivery.expectedDate).toLocaleDateString()} - ${delivery.totalAmount.toFixed(2)}
+                        </p>
+                      </div>
+                      <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                        View
+                      </button>
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {delivery.items.length} items
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-8 text-center text-gray-500">
-              <p>No upcoming deliveries</p>
-            </div>
-          )}
-        </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-gray-500">
+                <p>No upcoming deliveries</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -5,21 +5,16 @@ import {
   Package, 
   Truck, 
   Users, 
-  BarChart2, 
-  Settings, 
+  Store,
+  CreditCard,
+  AlertCircle,
+  Bell,
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  Map,
-  CreditCard,
-  AlertCircle,
-  Scan,
-  ClipboardList,
   Boxes
 } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext';
-import { useAuth } from '../auth/AuthProvider';
-import RoleSwitcher from '../auth/RoleSwitcher';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,8 +22,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
-  const { currentUser } = useAppContext();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
   const getNavItems = () => {
     const commonItems = [
@@ -37,30 +31,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 
     const roleSpecificItems = {
       admin: [
-        { path: '/inventory', icon: <Boxes size={20} />, label: 'Inventory' },
+        { path: '/products', icon: <Package size={20} />, label: 'Products' },
         { path: '/deliveries', icon: <Truck size={20} />, label: 'Deliveries' },
-        { path: '/management', icon: <Users size={20} />, label: 'Staff' },
-        { path: '/reports', icon: <BarChart2 size={20} />, label: 'Analytics' },
-        { path: '/settings', icon: <Settings size={20} />, label: 'Settings' },
+        { path: '/employees', icon: <Users size={20} />, label: 'Employees' },
+        { path: '/stores', icon: <Store size={20} />, label: 'Stores' },
+        { path: '/gas-cards', icon: <CreditCard size={20} />, label: 'Gas Cards' },
+        { path: '/reports', icon: <AlertCircle size={20} />, label: 'Reports' },
+        { path: '/notifications', icon: <Bell size={20} />, label: 'Notifications' },
       ],
       logistics_specialist: [
-        { path: '/inventory', icon: <Package size={20} />, label: 'Stock Management' },
-        { path: '/deliveries', icon: <Truck size={20} />, label: 'Delivery Tracking' },
-        { path: '/reports', icon: <BarChart2 size={20} />, label: 'Reports' },
+        { path: '/products', icon: <Package size={20} />, label: 'Products' },
+        { path: '/deliveries', icon: <Truck size={20} />, label: 'Deliveries' },
+        { path: '/reports', icon: <AlertCircle size={20} />, label: 'Reports' },
       ],
       driver: [
-        { path: '/route', icon: <Map size={20} />, label: 'Navigation' },
-        { path: '/gas-card', icon: <CreditCard size={20} />, label: 'Fuel Card' },
-        { path: '/report-problem', icon: <AlertCircle size={20} />, label: 'Report Issue' },
+        { path: '/deliveries', icon: <Truck size={20} />, label: 'My Deliveries' },
+        { path: '/gas-cards', icon: <CreditCard size={20} />, label: 'Gas Card' },
+        { path: '/reports', icon: <AlertCircle size={20} />, label: 'Report Issue' },
       ],
       warehouse_worker: [
-        { path: '/scanner', icon: <Scan size={20} />, label: 'Scan Items' },
-        { path: '/tasks', icon: <ClipboardList size={20} />, label: 'Work Orders' },
-        { path: '/report-problem', icon: <AlertCircle size={20} />, label: 'Report Issue' },
+        { path: '/products', icon: <Package size={20} />, label: 'Products' },
+        { path: '/reports', icon: <AlertCircle size={20} />, label: 'Report Issue' },
       ],
     };
 
-    return [...commonItems, ...(roleSpecificItems[currentUser?.role || 'logistics_specialist'] || [])];
+    return [...commonItems, ...(roleSpecificItems[user?.role || 'warehouse_worker'] || [])];
   };
 
   const navItems = getNavItems();
@@ -115,8 +110,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           ))}
         </ul>
       </nav>
-
-      {currentUser?.role === 'admin' && <RoleSwitcher />}
 
       <div className={`mt-auto border-t border-blue-800 p-4 ${!isOpen && 'lg:flex lg:justify-center'}`}>
         <button 

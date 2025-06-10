@@ -1,22 +1,11 @@
-import React, { useEffect } from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import MobileNav from './MobileNav';
-import { useAppContext } from '../../context/AppContext';
 
 const Layout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const { currentUser } = useAppContext();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!currentUser) {
-      navigate('/login');
-    }
-  }, [currentUser, navigate]);
-
-  if (!currentUser) return null;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
