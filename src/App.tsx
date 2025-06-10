@@ -39,7 +39,7 @@ function App() {
                 <Route path="reports" element={<Reports />} />
                 <Route path="notifications" element={<Notifications />} />
               </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/\" replace />} />
             </Routes>
           </AppProvider>
         </AuthProvider>

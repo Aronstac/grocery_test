@@ -26,7 +26,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, requiredRole }) =
   }
 
   if (requiredRole && !requiredRole.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/\" replace />;
   }
 
   return <>{children}</>;
